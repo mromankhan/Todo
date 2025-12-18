@@ -1,55 +1,58 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!-- SYNC IMPACT REPORT:
+Version change: N/A (initial version) → 1.0.0
+Modified principles: N/A
+Added sections: All principles below
+Removed sections: N/A
+Templates requiring updates: N/A
+Follow-up TODOs: None
+-->
+# Todo Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### No Implementation Without Approved Specification
+Specifications are the single source of truth for all project development. Any changes to the codebase require an updated specification first, ensuring that all implementations align with documented requirements and project goals.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### Specifications as Single Source of Truth  
+All specifications serve as the authoritative reference for project requirements, functionality, and architecture. All development, testing, and review activities must refer to these specifications as the definitive guide.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### Frontend and Backend Separation
+The frontend and backend must remain logically separated to ensure scalability, maintainability, and independent development cycles. Clear API contracts define the interface between these components.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### Consistent Authentication and Authorization
+Authentication and authorization mechanisms must be enforced consistently across all application layers. All access controls must follow uniform security standards and protocols.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### Mandatory User Data Isolation
+User data isolation is mandatory at all layers of the application. Each user's data must be securely separated from others to ensure privacy and security compliance.
 
-### [PRINCIPLE_6_NAME]
+### No Hardcoded Secrets
+Secrets and credentials must never be hardcoded in the source code. All sensitive information must be stored securely using appropriate configuration management and vault solutions.
 
+### MCP Server Usage Requirement
+MCP servers are available and must be utilized when relevant for up-to-date knowledge. All team members should leverage these resources for accurate and current project information.
 
-[PRINCIPLE__DESCRIPTION]
+### MCP Over Assumptions
+Prefer MCP sources over assumptions or outdated knowledge when making development decisions. This ensures that all implementations are based on reliable and current information.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### Production-Ready Code Standards
+Generated code must be clean, readable, and production-ready. All code must meet quality standards for maintainability, performance, and reliability.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### Explicit Error Handling
+Errors must be handled explicitly in all parts of the application. Proper error reporting, logging, and recovery mechanisms must be implemented to ensure robust operation.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Constitution Rules Override All Instructions
+Constitution rules override all other instructions, guidelines, and practices. All team members must abide by these principles regardless of conflicting directives.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Additional Constraints
+
+All development must follow the established technology stack requirements, maintain consistent coding standards, and comply with security and deployment policies.
+
+## Development Workflow
+
+Code review requirements must verify constitution compliance, testing gates must validate all principles, and deployment approval processes must ensure adherence to all constitutional rules.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other development practices. Any amendments require proper documentation, approval, and migration planning. All PRs and reviews must verify compliance with these principles. Complexity must be justified with clear benefits to the project.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-18 | **Last Amended**: 2025-12-18
