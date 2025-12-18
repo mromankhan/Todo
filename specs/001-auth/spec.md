@@ -5,6 +5,16 @@
 **Status**: Draft
 **Input**: User description: "let's create specification for authentication Scope: - User authentication using Better Auth - Web-based authentication flow - Authentication must be implemented in the /frontend Next.js App Router application - Better Auth must be used within the Next.js frontend for all authentication flows - shadcn/ui must be used for all authentication-related UI components Requirements: - Users must be able to sign up with email and password - Users must be able to sign in with email and password - Users must be able to sign out - Users must be able to sign up using email/password and Google OAuth - Users must be able to sign in using email/password and Google OAuth - Authentication state must persist across page reloads - Authenticated users must be identifiable across frontend and backend - JWT tokens must be issued on successful authentication - Unauthenticated users must not access protected pages or APIs UI Requirements: - Authentication UI must use shadcn/ui components - Provide pages for sign up, sign in, and sign out - Show clear validation errors and loading states - UI must be responsive and accessible Behavior: - On successful login, user is redirected to the main app - On logout, user session is cleared - Invalid credentials must return clear error messages Constraints: - Authentication must integrate with backend authorization - User identity must be consistent across the system - Follow all Constitution rules"
 
+## Clarifications
+
+### Session 2025-12-18
+
+- Q: What should be the default behavior when an already authenticated user tries to access registration or login pages? → A: Redirect to main application
+- Q: How should the system handle expired JWT tokens? → A: Automatically refresh tokens in background if possible
+- Q: What should the system do when the OAuth provider (Google) is unavailable? → A: Show error message and allow alternative login (email/password)
+- Q: How should the system handle users with the same email from different OAuth providers? → A: Link to existing account (single account, multiple providers)
+- Q: What should be the maximum acceptable response time for authentication operations? → A: Authentication should be fast and seamless
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - User Registration (Priority: P1)
@@ -20,6 +30,7 @@ As a new user, I want to register for an account with email and password or via 
 1. **Given** a new user visits the registration page, **When** they enter valid email and password and submit the form, **Then** they are registered and redirected to the main app
 2. **Given** a new user visits the registration page, **When** they click on the Google OAuth button and complete the process, **Then** they are registered and redirected to the main app
 3. **Given** a user enters invalid email or password, **When** they submit the form, **Then** they see clear validation errors
+4. **Given** an already authenticated user visits the registration page, **When** they attempt to access it, **Then** they are redirected to the main application
 
 ---
 
@@ -36,6 +47,7 @@ As a registered user, I want to sign in to my account with email and password or
 1. **Given** a registered user visits the login page, **When** they enter valid email and password and submit the form, **Then** they are logged in and redirected to the main app
 2. **Given** a registered user visits the login page, **When** they click on the Google OAuth button and complete the process, **Then** they are logged in and redirected to the main app
 3. **Given** a user enters invalid credentials, **When** they submit the form, **Then** they see clear error messages about invalid credentials
+4. **Given** an already authenticated user visits the login page, **When** they attempt to access it, **Then** they are redirected to the main application
 
 ---
 
@@ -84,9 +96,6 @@ As an application, I want to prevent unauthenticated users from accessing protec
 
 ### Edge Cases
 
-- What happens when an already authenticated user tries to access the registration or login pages?
-- How does the system handle expired JWT tokens?
-- What behavior occurs when the OAuth provider is unavailable?
 - How does the system handle users with the same email from different OAuth providers?
 
 ## Requirements *(mandatory)*
@@ -111,6 +120,9 @@ As an application, I want to prevent unauthenticated users from accessing protec
 - **FR-016**: System MUST show loading states during authentication operations
 - **FR-017**: Authentication UI MUST be responsive and accessible
 - **FR-018**: System MUST use Better Auth in the Next.js frontend for all authentication flows
+- **FR-019**: System MUST attempt to automatically refresh JWT tokens in the background when they expire
+- **FR-020**: System MUST show error message and allow alternative login when OAuth provider is unavailable
+- **FR-021**: System MUST link OAuth accounts with same email to existing account
 
 ### Key Entities *(include if feature involves data)*
 
@@ -129,3 +141,4 @@ As an application, I want to prevent unauthenticated users from accessing protec
 - **SC-005**: Users attempting to access protected routes without authentication are redirected to login page within 1 second
 - **SC-006**: 100% of authentication UI components use shadcn/ui components as required
 - **SC-007**: All authentication flows work consistently across different modern browsers (Chrome, Firefox, Safari, Edge)
+- **SC-008**: Authentication operations complete in under 2 seconds for 95% of requests
