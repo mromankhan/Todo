@@ -138,3 +138,9 @@ When making significant architectural decisions, suggest creating an ADR:
 > "📋 Architectural decision detected: <brief>. Document? Run `/sp.adr <title>`"
 
 Test for ADR significance: Does it have long-term impact + multiple alternatives + cross-cutting scope?
+
+## Active Technologies
+- Neon Serverless PostgreSQL (cloud-hosted) (001-fullstack-todo-app)
+
+## Recent Changes
+- 001-fullstack-todo-app: Added Neon Serverless PostgreSQL (cloud-hosted)
