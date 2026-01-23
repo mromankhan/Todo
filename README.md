@@ -1,4 +1,4 @@
-# Todo Application
+# Todo Application (Hackathon 2)
 
 Todo/
 ├── .spec-kit/                    # Spec-Kit configuration
