@@ -67,7 +67,10 @@ export function TaskForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
+        <Label htmlFor="title" className="flex items-center gap-1">
+          <span>Task Title *</span>
+          <span className="text-xs text-muted-foreground">({title.length}/200)</span>
+        </Label>
         <Input
           id="title"
           type="text"
@@ -76,10 +79,15 @@ export function TaskForm({
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
           required
+          autoFocus={!isEditing}
+          className="text-base"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="description">Description (optional)</Label>
+        <Label htmlFor="description" className="flex items-center gap-1">
+          <span>Description</span>
+          <span className="text-xs text-muted-foreground">({description.length}/1000)</span>
+        </Label>
         <Input
           id="description"
           type="text"
@@ -87,15 +95,16 @@ export function TaskForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={1000}
+          className="text-base"
         />
       </div>
       {error && (
-        <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
+        <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
           {error}
         </div>
       )}
       <div className="flex gap-2">
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading} className="flex-1">
           {loading
             ? isEditing
               ? "Saving..."
@@ -105,7 +114,7 @@ export function TaskForm({
             : "Add Task"}
         </Button>
         {isEditing && onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
             Cancel
           </Button>
         )}

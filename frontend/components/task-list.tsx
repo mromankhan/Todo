@@ -18,24 +18,29 @@ export function TaskList({
 }: TaskListProps) {
   if (tasks.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-zinc-600 dark:text-zinc-400">
-          No tasks yet. Create your first task above!
+      <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-12 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+          <CheckCircle2 className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium text-foreground">No tasks</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Get started by creating a new task.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {tasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          userId={userId}
-          onTaskUpdated={onTaskUpdated}
-          onTaskDeleted={onTaskDeleted}
-        />
+    <div className="rounded-lg border bg-background overflow-hidden">
+      {tasks.map((task, index) => (
+        <div key={task.id} className={index !== tasks.length - 1 ? "border-b border-border" : ""}>
+          <TaskItem
+            task={task}
+            userId={userId}
+            onTaskUpdated={onTaskUpdated}
+            onTaskDeleted={onTaskDeleted}
+          />
+        </div>
       ))}
     </div>
   );

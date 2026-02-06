@@ -96,13 +96,14 @@ export function TaskItem({
 
   if (isEditing) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="p-4 border-b border-border last:border-b-0">
         <div className="space-y-3">
           <Input
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             placeholder="Task title"
             maxLength={200}
+            autoFocus
           />
           <Input
             value={editDescription}
@@ -111,7 +112,7 @@ export function TaskItem({
             maxLength={1000}
           />
           {error && (
-            <div className="text-sm text-red-500">{error}</div>
+            <div className="text-sm text-destructive">{error}</div>
           )}
           <div className="flex gap-2">
             <Button size="sm" onClick={handleSaveEdit} disabled={loading}>
@@ -129,18 +130,18 @@ export function TaskItem({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950",
-        task.completed && "opacity-60"
+        "p-4 border-b border-border last:border-b-0 flex items-start gap-3",
+        task.completed && "opacity-70"
       )}
     >
       <button
         onClick={handleToggleComplete}
         disabled={loading}
         className={cn(
-          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors",
+          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
           task.completed
             ? "border-green-500 bg-green-500 text-white"
-            : "border-zinc-300 hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-600"
+            : "border-input hover:border-input/80"
         )}
       >
         {task.completed && <Check className="h-3 w-3" />}
@@ -149,24 +150,27 @@ export function TaskItem({
       <div className="flex-1 min-w-0">
         <h3
           className={cn(
-            "font-medium text-zinc-900 dark:text-zinc-50",
-            task.completed && "line-through"
+            "font-medium text-foreground",
+            task.completed && "line-through opacity-70"
           )}
         >
           {task.title}
         </h3>
         {task.description && (
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             {task.description}
           </p>
         )}
-        <p className="mt-2 text-xs text-zinc-500">
-          Created {formatDate(task.created_at)}
+        <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Created {formatDate(task.created_at)}</span>
           {task.updated_at !== task.created_at && (
-            <> &middot; Updated {formatDate(task.updated_at)}</>
+            <>
+              <span>•</span>
+              <span>Updated {formatDate(task.updated_at)}</span>
+            </>
           )}
-        </p>
-        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+        </div>
+        {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
       </div>
 
       <div className="flex gap-1">
@@ -175,7 +179,7 @@ export function TaskItem({
           variant="ghost"
           onClick={() => setIsEditing(true)}
           disabled={loading}
-          className="h-8 w-8"
+          className="h-8 w-8 hover:bg-accent"
         >
           <Pencil className="h-4 w-4" />
           <span className="sr-only">Edit</span>
@@ -185,7 +189,7 @@ export function TaskItem({
           variant="ghost"
           onClick={handleDelete}
           disabled={loading}
-          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+          className="h-8 w-8 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
         >
           <Trash2 className="h-4 w-4" />
           <span className="sr-only">Delete</span>
