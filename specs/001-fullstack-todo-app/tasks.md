@@ -25,11 +25,11 @@
 
 **Purpose**: Project initialization, dependencies, and basic structure
 
-- [ ] T001 Add backend dependencies to backend/pyproject.toml (python-jose[cryptography], asyncpg)
-- [ ] T002 [P] Create backend/.env.example with DATABASE_URL, BETTER_AUTH_SECRET, FRONTEND_URL placeholders
-- [ ] T003 [P] Create frontend/.env.example with NEXT_PUBLIC_API_URL, BETTER_AUTH_SECRET, DATABASE_URL placeholders
-- [ ] T004 [P] Create backend directory structure: routes/, middleware/ folders
-- [ ] T005 Install backend dependencies by running `uv sync` in backend/
+- [x] T001 Add backend dependencies to backend/pyproject.toml (python-jose[cryptography], asyncpg)
+- [x] T002 [P] Create backend/.env.example with DATABASE_URL, BETTER_AUTH_SECRET, FRONTEND_URL placeholders
+- [x] T003 [P] Create frontend/.env.example with NEXT_PUBLIC_API_URL, BETTER_AUTH_SECRET, DATABASE_URL placeholders
+- [x] T004 [P] Create backend directory structure: routes/, middleware/ folders
+- [x] T005 Install backend dependencies by running `uv sync` in backend/
 
 ---
 
@@ -39,13 +39,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create database connection module in backend/db.py with async engine and session (per research.md pattern)
-- [ ] T007 [P] Create Task SQLModel schemas in backend/models.py (TaskBase, TaskCreate, TaskUpdate, Task, TaskRead per data-model.md)
-- [ ] T008 [P] Create JWT verification middleware in backend/middleware/auth.py (per research.md pattern)
-- [ ] T009 Create FastAPI app entry point in backend/main.py with CORS middleware (per research.md pattern)
-- [ ] T010 Add health check endpoint GET /health in backend/main.py
-- [ ] T011 Create TypeScript types for Task in frontend/lib/types.ts (Task, TaskCreate, TaskUpdate interfaces)
-- [ ] T012 [P] Create API client base with auth header injection in frontend/lib/api.ts (per research.md pattern)
+- [x] T006 Create database connection module in backend/db.py with async engine and session (per research.md pattern)
+- [x] T007 [P] Create Task SQLModel schemas in backend/models.py (TaskBase, TaskCreate, TaskUpdate, Task, TaskRead per data-model.md)
+- [x] T008 [P] Create JWT verification middleware in backend/middleware/auth.py (per research.md pattern)
+- [x] T009 Create FastAPI app entry point in backend/main.py with CORS middleware (per research.md pattern)
+- [x] T010 Add health check endpoint GET /health in backend/main.py
+- [x] T011 Create TypeScript types for Task in frontend/lib/types.ts (Task, TaskCreate, TaskUpdate interfaces)
+- [x] T012 [P] Create API client base with auth header injection in frontend/lib/api.ts (per research.md pattern)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -66,16 +66,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Configure Better Auth server in frontend/lib/auth.ts with JWT plugin (per research.md)
-- [ ] T014 [US1] Create Better Auth API route handler in frontend/app/api/auth/[...all]/route.ts
-- [ ] T015 [US1] Create auth client in frontend/lib/auth-client.ts with useSession, signIn, signUp, signOut exports
-- [ ] T016 [P] [US1] Create sign-up form component in frontend/components/auth/sign-up-form.tsx
-- [ ] T017 [P] [US1] Create sign-in form component in frontend/components/auth/sign-in-form.tsx
-- [ ] T018 [US1] Create sign-up page in frontend/app/(auth)/sign-up/page.tsx using sign-up-form
-- [ ] T019 [US1] Create sign-in page in frontend/app/(auth)/sign-in/page.tsx using sign-in-form
-- [ ] T020 [US1] Create Next.js middleware for route protection in frontend/middleware.ts (per research.md)
-- [ ] T021 [US1] Update landing page frontend/app/page.tsx with sign-in/sign-up links
-- [ ] T022 [US1] Add auth provider wrapper to frontend/app/layout.tsx
+- [x] T013 [US1] Configure Better Auth server in frontend/lib/auth.ts with JWT plugin (per research.md)
+- [x] T014 [US1] Create Better Auth API route handler in frontend/app/api/auth/[...all]/route.ts
+- [x] T015 [US1] Create auth client in frontend/lib/auth-client.ts with useSession, signIn, signUp, signOut exports
+- [x] T016 [P] [US1] Create sign-up form component in frontend/components/auth/sign-up-form.tsx
+- [x] T017 [P] [US1] Create sign-in form component in frontend/components/auth/sign-in-form.tsx
+- [x] T018 [US1] Create sign-up page in frontend/app/(auth)/sign-up/page.tsx using sign-up-form
+- [x] T019 [US1] Create sign-in page in frontend/app/(auth)/sign-in/page.tsx using sign-in-form
+- [x] T020 [US1] Create Next.js middleware for route protection in frontend/middleware.ts (per research.md)
+- [x] T021 [US1] Update landing page frontend/app/page.tsx with sign-in/sign-up links
+- [x] T022 [US1] Add auth provider wrapper to frontend/app/layout.tsx
 
 **Checkpoint**: Users can register, sign in, and sign out. Protected routes redirect unauthenticated users.
 
@@ -95,12 +95,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T023 [US2] Create tasks router in backend/routes/tasks.py with router setup and user_id validation helper
-- [ ] T024 [US2] Implement POST /api/{user_id}/tasks endpoint in backend/routes/tasks.py
-- [ ] T025 [US2] Register tasks router in backend/main.py
-- [ ] T026 [US2] Add task creation method to API client in frontend/lib/api.ts (api.tasks.create)
-- [ ] T027 [US2] Create task form component in frontend/components/task-form.tsx with title/description inputs
-- [ ] T028 [US2] Create dashboard page shell in frontend/app/dashboard/page.tsx with task form
+- [x] T023 [US2] Create tasks router in backend/routes/tasks.py with router setup and user_id validation helper
+- [x] T024 [US2] Implement POST /api/{user_id}/tasks endpoint in backend/routes/tasks.py
+- [x] T025 [US2] Register tasks router in backend/main.py
+- [x] T026 [US2] Add task creation method to API client in frontend/lib/api.ts (api.tasks.create)
+- [x] T027 [US2] Create task form component in frontend/components/task-form.tsx with title/description inputs
+- [x] T028 [US2] Create dashboard page shell in frontend/app/dashboard/page.tsx with task form
 
 **Checkpoint**: Signed-in users can create tasks that are saved to database.
 
@@ -120,11 +120,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] Implement GET /api/{user_id}/tasks endpoint in backend/routes/tasks.py
-- [ ] T030 [US3] Add task list method to API client in frontend/lib/api.ts (api.tasks.list)
-- [ ] T031 [US3] Create task item component in frontend/components/task-item.tsx displaying title, status, date
-- [ ] T032 [US3] Create task list component in frontend/components/task-list.tsx with empty state message
-- [ ] T033 [US3] Integrate task list into dashboard page frontend/app/dashboard/page.tsx with data fetching
+- [x] T029 [US3] Implement GET /api/{user_id}/tasks endpoint in backend/routes/tasks.py
+- [x] T030 [US3] Add task list method to API client in frontend/lib/api.ts (api.tasks.list)
+- [x] T031 [US3] Create task item component in frontend/components/task-item.tsx displaying title, status, date
+- [x] T032 [US3] Create task list component in frontend/components/task-list.tsx with empty state message
+- [x] T033 [US3] Integrate task list into dashboard page frontend/app/dashboard/page.tsx with data fetching
 
 **Checkpoint**: Users can see all their tasks in a list. Empty state shows when no tasks exist.
 
@@ -143,10 +143,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T034 [US4] Implement PATCH /api/{user_id}/tasks/{task_id}/complete endpoint in backend/routes/tasks.py
-- [ ] T035 [US4] Add toggle complete method to API client in frontend/lib/api.ts (api.tasks.toggleComplete)
-- [ ] T036 [US4] Add completion toggle button/checkbox to frontend/components/task-item.tsx
-- [ ] T037 [US4] Wire toggle action in task-item.tsx with optimistic update and error handling
+- [x] T034 [US4] Implement PATCH /api/{user_id}/tasks/{task_id}/complete endpoint in backend/routes/tasks.py
+- [x] T035 [US4] Add toggle complete method to API client in frontend/lib/api.ts (api.tasks.toggleComplete)
+- [x] T036 [US4] Add completion toggle button/checkbox to frontend/components/task-item.tsx
+- [x] T037 [US4] Wire toggle action in task-item.tsx with optimistic update and error handling
 
 **Checkpoint**: Users can mark tasks complete or incomplete with visual feedback.
 
@@ -166,12 +166,12 @@
 
 ### Implementation for User Story 5
 
-- [ ] T038 [US5] Implement GET /api/{user_id}/tasks/{task_id} endpoint in backend/routes/tasks.py
-- [ ] T039 [US5] Implement PUT /api/{user_id}/tasks/{task_id} endpoint in backend/routes/tasks.py
-- [ ] T040 [US5] Add task get and update methods to API client in frontend/lib/api.ts (api.tasks.get, api.tasks.update)
-- [ ] T041 [US5] Add edit mode to frontend/components/task-form.tsx for updating existing tasks
-- [ ] T042 [US5] Add edit button and inline edit UI to frontend/components/task-item.tsx
-- [ ] T043 [US5] Wire edit functionality with validation and error handling
+- [x] T038 [US5] Implement GET /api/{user_id}/tasks/{task_id} endpoint in backend/routes/tasks.py
+- [x] T039 [US5] Implement PUT /api/{user_id}/tasks/{task_id} endpoint in backend/routes/tasks.py
+- [x] T040 [US5] Add task get and update methods to API client in frontend/lib/api.ts (api.tasks.get, api.tasks.update)
+- [x] T041 [US5] Add edit mode to frontend/components/task-form.tsx for updating existing tasks
+- [x] T042 [US5] Add edit button and inline edit UI to frontend/components/task-item.tsx
+- [x] T043 [US5] Wire edit functionality with validation and error handling
 
 **Checkpoint**: Users can edit task title and description with validation.
 
@@ -190,11 +190,11 @@
 
 ### Implementation for User Story 6
 
-- [ ] T044 [US6] Implement DELETE /api/{user_id}/tasks/{task_id} endpoint in backend/routes/tasks.py
-- [ ] T045 [US6] Add delete method to API client in frontend/lib/api.ts (api.tasks.delete)
-- [ ] T046 [US6] Add delete button to frontend/components/task-item.tsx
-- [ ] T047 [US6] Add confirmation dialog for delete action (can use simple confirm() or modal)
-- [ ] T048 [US6] Wire delete action with confirmation and error handling
+- [x] T044 [US6] Implement DELETE /api/{user_id}/tasks/{task_id} endpoint in backend/routes/tasks.py
+- [x] T045 [US6] Add delete method to API client in frontend/lib/api.ts (api.tasks.delete)
+- [x] T046 [US6] Add delete button to frontend/components/task-item.tsx
+- [x] T047 [US6] Add confirmation dialog for delete action (can use simple confirm() or modal)
+- [x] T048 [US6] Wire delete action with confirmation and error handling
 
 **Checkpoint**: Users can delete tasks with confirmation. Deleted tasks are permanently removed.
 
@@ -204,13 +204,13 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T049 Add loading states to all API operations in task components
-- [ ] T050 Add error toast/notification for failed operations across all features
-- [ ] T051 [P] Style task components with Tailwind CSS for consistent UI
-- [ ] T052 [P] Add responsive design adjustments for mobile browsers
-- [ ] T053 Initialize database tables on backend startup in backend/main.py (call init_db)
-- [ ] T054 Add sign out button to dashboard header in frontend/app/dashboard/page.tsx
-- [ ] T055 Verify end-to-end flow: register → create task → view → complete → edit → delete → sign out
+- [x] T049 Add loading states to all API operations in task components
+- [x] T050 Add error toast/notification for failed operations across all features
+- [x] T051 [P] Style task components with Tailwind CSS for consistent UI
+- [x] T052 [P] Add responsive design adjustments for mobile browsers
+- [x] T053 Initialize database tables on backend startup in backend/main.py (call init_db)
+- [x] T054 Add sign out button to dashboard header in frontend/app/dashboard/page.tsx
+- [x] T055 Verify end-to-end flow: register → create task → view → complete → edit → delete → sign out
 
 ---
 
