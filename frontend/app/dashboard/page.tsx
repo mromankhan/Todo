@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, Plus, Calendar, CheckCircle2, Circle, Filter, BarChart3, Loader2 } from "lucide-react";
+import FloatingChat from "@/components/chat-interface";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { TaskForm } from "@/components/task-form";
@@ -362,6 +363,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* Floating AI Chat Widget - bottom right */}
+      <FloatingChat />
     </div>
   );
 }
