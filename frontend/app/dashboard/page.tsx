@@ -100,7 +100,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="bg-primary p-2 rounded-lg">
@@ -127,7 +127,7 @@ export default function DashboardPage() {
                 <span className="font-medium">{activeTasks}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4 text-blue-500" />
+                <Calendar className="h-4 w-4 text-primary" />
                 <span className="text-muted-foreground">Completion: </span>
                 <span className="font-medium">{completionRate}%</span>
               </div>
@@ -169,7 +169,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
@@ -207,7 +207,7 @@ export default function DashboardPage() {
                 <div className="pt-2">
                   <div className="flex justify-between items-center mb-1">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-500" />
+                      <Calendar className="h-4 w-4 text-primary" />
                       <span className="text-muted-foreground">Progress</span>
                     </div>
                     <span className="text-sm font-medium">{completionRate}%</span>
