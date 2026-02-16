@@ -1,9 +1,14 @@
-"""OpenAI Agent configuration for todo task management."""
+"""Gemini-powered Agent configuration for todo task management."""
 import os
-from agents import Agent
+
+from openai import AsyncOpenAI
+from agents import Agent, OpenAIChatCompletionsModel, set_tracing_disabled
 from chatkit.agents import AgentContext
 
 from mcp_tools import add_task, list_tasks, complete_task, update_task, delete_task
+
+# Disable tracing (not supported by Gemini endpoint)
+set_tracing_disabled(disabled=True)
 
 
 # System instructions for the agent
@@ -48,20 +53,29 @@ You: "✓ Marked task #1 'Buy groceries' as completed"
 
 def create_agent() -> Agent:
     """
-    Create and configure the OpenAI Agent for task management.
+    Create and configure the Gemini-powered Agent for task management.
 
     Returns:
         Configured Agent instance with AgentContext typing
     """
-    openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not openai_api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is not set")
+    gemini_api_key = os.environ.get("GEMINI_API_KEY")
+    if not gemini_api_key:
+        raise ValueError("GEMINI_API_KEY environment variable is not set")
 
-    # Create agent with AgentContext typing
+    # Create Gemini client via OpenAI-compatible endpoint
+    gemini_client = AsyncOpenAI(
+        api_key=gemini_api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    )
+
+    # Create agent with Gemini model
     agent = Agent[AgentContext](
         name="TodoAssistant",
         instructions=SYSTEM_INSTRUCTIONS,
-        model="gpt-4.1-mini",  # Fast and cost-effective model
+        model=OpenAIChatCompletionsModel(
+            model="gemini-2.5-flash",
+            openai_client=gemini_client,
+        ),
         tools=[
             add_task,
             list_tasks,

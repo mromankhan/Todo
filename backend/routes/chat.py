@@ -1,4 +1,5 @@
 """ChatKit endpoint for AI-powered chat interface."""
+import traceback
 from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, Depends, Request, Response
@@ -15,7 +16,7 @@ from agents import Runner
 
 from chatkit_store import SQLModelChatKitStore, RequestContext
 from chat_agent import agent
-from middleware.auth import verify_jwt_from_cookie
+from middleware.auth import verify_jwt_bearer
 
 
 router = APIRouter(prefix="/chatkit", tags=["chat"])
@@ -41,6 +42,8 @@ class TodoChatKitServer(ChatKitServer[RequestContext]):
         Yields:
             Thread stream events for the client
         """
+        print(f"[CHAT] respond called for thread={thread.id}, user={context.user_id}")
+
         # Load recent thread history for context
         items_page = await self.store.load_thread_items(
             thread.id,
@@ -50,8 +53,12 @@ class TodoChatKitServer(ChatKitServer[RequestContext]):
             context=context,
         )
 
+        print(f"[CHAT] Loaded {len(items_page.data)} history items")
+
         # Convert thread items to agent input
         input_items = await simple_to_agent_input(items_page.data)
+
+        print(f"[CHAT] Converted to {len(input_items)} agent input items")
 
         # Create agent context with thread and store
         agent_context = AgentContext(
@@ -67,9 +74,15 @@ class TodoChatKitServer(ChatKitServer[RequestContext]):
             context=agent_context,
         )
 
+        print("[CHAT] Agent streaming started")
+
         # Stream the agent response as ChatKit events
-        async for event in stream_agent_response(agent_context, result):
-            yield event
+        try:
+            async for event in stream_agent_response(agent_context, result):
+                yield event
+        except Exception as e:
+            print(f"[CHAT] ERROR during streaming: {type(e).__name__}: {e}")
+            traceback.print_exc()
 
 
 # Initialize ChatKit Store
@@ -82,7 +95,7 @@ chatkit_server = TodoChatKitServer(store=store)
 @router.post("")
 async def chatkit_endpoint(
     request: Request,
-    current_user: dict = Depends(verify_jwt_from_cookie),
+    current_user: dict = Depends(verify_jwt_bearer),
 ) -> Response:
     """
     ChatKit protocol endpoint for AI-powered chat.

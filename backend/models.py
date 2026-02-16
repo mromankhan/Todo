@@ -49,6 +49,7 @@ class Conversation(SQLModel, table=True):
     """Database model for chat conversations (threads)."""
 
     id: Optional[int] = Field(default=None, primary_key=True)
+    thread_id: str = Field(index=True, unique=True, nullable=False)
     user_id: str = Field(index=True, nullable=False)
     title: Optional[str] = Field(default=None, max_length=200)
     created_at: datetime = Field(default_factory=datetime.utcnow)
