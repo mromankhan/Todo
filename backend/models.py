@@ -43,3 +43,24 @@ class TaskRead(TaskBase):
     completed: bool
     created_at: datetime
     updated_at: datetime
+
+
+class Conversation(SQLModel, table=True):
+    """Database model for chat conversations (threads)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: str = Field(index=True, nullable=False)
+    title: Optional[str] = Field(default=None, max_length=200)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Message(SQLModel, table=True):
+    """Database model for chat messages within conversations."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    conversation_id: int = Field(foreign_key="conversation.id", index=True, nullable=False)
+    user_id: str = Field(index=True, nullable=False)
+    role: str = Field(nullable=False)  # "user" or "assistant"
+    content: str = Field(nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)

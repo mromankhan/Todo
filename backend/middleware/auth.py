@@ -3,7 +3,7 @@ import os
 from typing import Any
 
 from jose import jwt, JWTError
-from fastapi import HTTPException, Depends, status
+from fastapi import HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
@@ -47,6 +47,57 @@ async def verify_jwt(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+async def verify_jwt_from_cookie(request: Request) -> dict[str, Any]:
+    """
+    Verify JWT token from cookie (for ChatKit endpoint).
+
+    Better Auth stores the session token in a cookie named 'better-auth.session_token'.
+    This function extracts and validates that token for ChatKit requests.
+
+    Args:
+        request: The FastAPI request object.
+
+    Returns:
+        The decoded JWT payload containing user information.
+
+    Raises:
+        HTTPException: If the token is invalid, expired, or missing.
+    """
+    # Try multiple cookie names where Better Auth might store the token
+    token = (
+        request.cookies.get("better-auth.session_token") or
+        request.cookies.get("session_token") or
+        request.cookies.get("auth_token")
+    )
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required: no session token found",
+        )
+
+    secret = os.environ.get("BETTER_AUTH_SECRET")
+    if not secret:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: missing auth secret",
+        )
+
+    try:
+        # Verify the JWT token using HS256 algorithm
+        payload = jwt.decode(
+            token,
+            secret,
+            algorithms=["HS256"],
+        )
+        return payload
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired session token",
         )
 
 
