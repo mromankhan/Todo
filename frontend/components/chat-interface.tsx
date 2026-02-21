@@ -18,14 +18,29 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
     api: {
       url: "http://localhost:8000/chatkit",
       domainKey: "local-dev",
-      fetch: (input, init) =>
-        fetch(input, {
+      fetch: async (input, init) => {
+        // Fetch a proper HS256 JWT from our token endpoint (same as tasks API)
+        let token = "";
+        try {
+          const tokenRes = await fetch("/api/token", { credentials: "include" });
+          if (tokenRes.ok) {
+            const data = await tokenRes.json();
+            token = data.token || "";
+          }
+        } catch {
+          // Token endpoint unavailable
+        }
+        // Use Headers constructor to properly handle Headers objects
+        const headers = new Headers(init?.headers);
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+        return fetch(input, {
           ...init,
           credentials: "include",
-          headers: {
-            ...(init?.headers || {}),
-          },
-        }),
+          headers,
+        });
+      },
     },
     history: {
       enabled: true,

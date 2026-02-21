@@ -101,6 +101,39 @@ async def verify_jwt_from_cookie(request: Request) -> dict[str, Any]:
         )
 
 
+async def verify_jwt_bearer(request: Request) -> dict[str, Any]:
+    """
+    Verify JWT from Authorization Bearer header (for ChatKit endpoint).
+
+    Manually extracts the Bearer token from the Authorization header
+    without using HTTPBearer dependency (avoids OpenAPI security scheme issues).
+    """
+    auth_header = request.headers.get("authorization", "")
+    if not auth_header.lower().startswith("bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header with Bearer token required",
+        )
+
+    token = auth_header[7:]  # Strip "Bearer " prefix
+
+    secret = os.environ.get("BETTER_AUTH_SECRET")
+    if not secret:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: missing auth secret",
+        )
+
+    try:
+        payload = jwt.decode(token, secret, algorithms=["HS256"])
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        )
+
+
 def validate_user_access(user_id: str, current_user: dict[str, Any]) -> None:
     """
     Validate that the current user has access to the specified user_id's resources.

@@ -87,7 +87,29 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Initialize database tables."""
+    """Initialize database tables and run migrations."""
+    from sqlalchemy import text, inspect
+    from models import Conversation, Message
+
     engine = get_engine()
+
+    # Check if conversation table needs migration (missing thread_id column)
+    async with engine.connect() as conn:
+        def check_column(sync_conn):
+            insp = inspect(sync_conn)
+            if insp.has_table("conversation"):
+                columns = [c["name"] for c in insp.get_columns("conversation")]
+                return "thread_id" not in columns
+            return False
+
+        needs_migration = await conn.run_sync(check_column)
+
+    if needs_migration:
+        # Drop old conversation/message tables and recreate with new schema
+        async with engine.begin() as conn:
+            await conn.execute(text("DROP TABLE IF EXISTS message"))
+            await conn.execute(text("DROP TABLE IF EXISTS conversation"))
+
+    # Create all tables (including recreated ones)
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
