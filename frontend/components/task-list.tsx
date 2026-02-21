@@ -2,6 +2,7 @@
 
 import { TaskItem } from "./task-item";
 import type { Task } from "@/lib/types";
+import { CheckCircle2 } from "lucide-react";
 
 interface TaskListProps {
   tasks: Task[];
