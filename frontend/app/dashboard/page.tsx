@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Plus, Calendar, CheckCircle2, Circle, Filter, BarChart3, Loader2 } from "lucide-react";
+import {
+  LogOut, Plus, CheckCircle2,
+  Loader2, ListTodo, ChevronDown, Sparkles,
+} from "lucide-react";
 import FloatingChat from "@/components/chat-interface";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -18,7 +21,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/types";
+
+type Filter = "all" | "active" | "completed";
+
+const FILTERS: { value: Filter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "completed", label: "Done" },
+];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -27,58 +39,30 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [filter, setFilter] = useState<Filter>("all");
 
   const userId = session?.user?.id;
 
   useEffect(() => {
     if (sessionLoading) return;
+    if (!session?.user) { router.push("/sign-in"); return; }
 
-    if (!session?.user) {
-      router.push("/sign-in");
-      return;
-    }
-
-    const fetchTasks = async () => {
-      try {
-        const fetchedTasks = await api.tasks.list(session.user.id);
-        setTasks(fetchedTasks);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load tasks");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTasks();
+    api.tasks.list(session.user.id)
+      .then(setTasks)
+      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load tasks"))
+      .finally(() => setLoading(false));
   }, [session, sessionLoading, router]);
 
-  // Calculate statistics
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const activeTasks = totalTasks - completedTasks;
-  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const total = tasks.length;
+  const completed = tasks.filter((t) => t.completed).length;
+  const active = total - completed;
+  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  const filteredTasks = tasks.filter(task => {
-    if (filter === 'active') return !task.completed;
-    if (filter === 'completed') return task.completed;
+  const filtered = tasks.filter((t) => {
+    if (filter === "active") return !t.completed;
+    if (filter === "completed") return t.completed;
     return true;
   });
-
-  const handleTaskCreated = (newTask: Task) => {
-    setTasks((prev) => [newTask, ...prev]);
-    setShowTaskForm(false);
-  };
-
-  const handleTaskUpdated = (updatedTask: Task) => {
-    setTasks((prev) =>
-      prev.map((task) => (task.id === updatedTask.id ? updatedTask : task))
-    );
-  };
-
-  const handleTaskDeleted = (taskId: number) => {
-    setTasks((prev) => prev.filter((task) => task.id !== taskId));
-  };
 
   const handleSignOut = async () => {
     clearToken();
@@ -86,286 +70,306 @@ export default function DashboardPage() {
     router.push("/");
   };
 
+  /* ── Full-screen session loading ── */
   if (sessionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary">
+            <ListTodo className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
       </div>
     );
   }
 
-  if (!session?.user) {
-    return null;
-  }
+  if (!session?.user) return null;
+
+  const initials = (session.user.name || session.user.email)
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-primary p-2 rounded-lg">
-                <CheckCircle2 className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <h1 className="text-xl font-bold text-foreground">Todo App</h1>
+    <div className="min-h-dvh bg-background">
+
+      {/* ── Sticky Header ─────────────────────────────────────────── */}
+      <header className="glass-header sticky top-0 z-40 border-b border-border/60">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
+
+          {/* Logo */}
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-sm">
+              <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
             </div>
-            
-            {/* Stats Overview - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-6 ml-8">
-              <div className="flex items-center gap-2 text-sm">
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Total: </span>
-                <span className="font-medium">{totalTasks}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-muted-foreground">Completed: </span>
-                <span className="font-medium">{completedTasks}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Circle className="h-4 w-4 text-yellow-500" />
-                <span className="text-muted-foreground">Active: </span>
-                <span className="font-medium">{activeTasks}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4 text-primary" />
-                <span className="text-muted-foreground">Completion: </span>
-                <span className="font-medium">{completionRate}%</span>
-              </div>
-            </div>
+            <span className="font-semibold text-foreground tracking-tight hidden sm:block">
+              Todo App
+            </span>
           </div>
-          
-          <div className="flex items-center gap-3">
+
+          {/* Right side */}
+          <div className="flex items-center gap-2">
             <ModeToggle />
-            {/* Profile Dropdown */}
-            <div className="relative">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium uppercase">
-                      {session.user.email.charAt(0)}
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium text-foreground leading-none">
-                        {session.user.name || session.user.email.split('@')[0]}
-                      </p>
-                      <p className="text-xs text-muted-foreground leading-none">
-                        {session.user.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+                    {initials}
+                  </div>
+                  <span className="hidden sm:block text-sm font-medium text-foreground max-w-28 truncate">
+                    {session.user.name?.split(" ")[0] || session.user.email.split("@")[0]}
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground hidden sm:block" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-sm font-semibold truncate">{session.user.name || "—"}</p>
+                    <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10 gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-card rounded-xl border p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Overview</h2>
+      {/* ── Main ──────────────────────────────────────────────────── */}
+      <main className="mx-auto max-w-6xl px-4 py-8 md:px-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+
+          {/* ── Sidebar ─────────────────────────────────────────── */}
+          <aside className="space-y-4 lg:col-span-1">
+
+            {/* Welcome card */}
+            <div className="rounded-2xl bg-primary p-5 text-primary-foreground relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-white/10" />
+              <div className="absolute -bottom-6 -left-4 h-20 w-20 rounded-full bg-white/10" />
+              <div className="relative z-10 space-y-1">
+                <p className="text-xs font-medium text-primary-foreground/70">Good work,</p>
+                <h2 className="text-base font-bold tracking-tight truncate">
+                  {session.user.name?.split(" ")[0] || "there"} 👋
+                </h2>
+                <p className="text-xs text-primary-foreground/70 mt-2">
+                  {active === 0
+                    ? "All tasks complete! Great job."
+                    : `${active} task${active > 1 ? "s" : ""} remaining today.`}
+                </p>
               </div>
-              
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Total Tasks</span>
+            </div>
+
+            {/* Stats */}
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Overview</p>
+
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "Total", value: total, color: "text-foreground" },
+                  { label: "Active", value: active, color: "text-amber-500" },
+                  { label: "Done", value: completed, color: "text-emerald-500" },
+                ].map((s) => (
+                  <div key={s.label} className="flex flex-col items-center rounded-xl bg-muted/50 py-3 gap-0.5">
+                    <span className={cn("text-xl font-bold tabular-nums", s.color)}>{s.value}</span>
+                    <span className="text-[10px] text-muted-foreground">{s.label}</span>
                   </div>
-                  <span className="font-medium">{totalTasks}</span>
+                ))}
+              </div>
+
+              {/* Progress bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">Progress</span>
+                  <span className="text-xs font-semibold tabular-nums">{progress}%</span>
                 </div>
-                
-                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-muted-foreground">Completed</span>
-                  </div>
-                  <span className="font-medium text-green-500">{completedTasks}</span>
-                </div>
-                
-                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-yellow-500" />
-                    <span className="text-muted-foreground">Active</span>
-                  </div>
-                  <span className="font-medium text-yellow-500">{activeTasks}</span>
-                </div>
-                
-                <div className="pt-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <span className="text-muted-foreground">Progress</span>
-                    </div>
-                    <span className="text-sm font-medium">{completionRate}%</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 mt-2">
-                    <div 
-                      className="bg-primary h-2 rounded-full transition-all duration-500 ease-out" 
-                      style={{ width: `${completionRate}%` }}
-                    ></div>
-                  </div>
+                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                    role="progressbar"
+                    aria-valuenow={progress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  />
                 </div>
               </div>
             </div>
-            
-            <div className="bg-card rounded-xl border p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Filter className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Filters</h2>
-              </div>
-              
-              <div className="space-y-2">
-                <Button
-                  variant={filter === 'all' ? 'secondary' : 'ghost'}
-                  className="w-full justify-start"
-                  onClick={() => setFilter('all')}
-                >
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  All Tasks
-                  <span className="ml-auto">{totalTasks}</span>
-                </Button>
-                
-                <Button
-                  variant={filter === 'active' ? 'secondary' : 'ghost'}
-                  className="w-full justify-start"
-                  onClick={() => setFilter('active')}
-                >
-                  <Circle className="mr-2 h-4 w-4 text-yellow-500" />
-                  Active
-                  <span className="ml-auto">{activeTasks}</span>
-                </Button>
-                
-                <Button
-                  variant={filter === 'completed' ? 'secondary' : 'ghost'}
-                  className="w-full justify-start"
-                  onClick={() => setFilter('completed')}
-                >
-                  <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                  Completed
-                  <span className="ml-auto">{completedTasks}</span>
-                </Button>
+
+            {/* AI hint */}
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-foreground">AI Assistant</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                    Ask the chat widget anything about your tasks.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Main Content */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Add Task Section */}
-            <section className="bg-card rounded-xl border p-6">
+          </aside>
+
+          {/* ── Content area ──────────────────────────────────────── */}
+          <div className="space-y-5 lg:col-span-3">
+
+            {/* Add task card */}
+            <div className="rounded-2xl border border-border bg-card p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Plus className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg font-semibold text-foreground">Add New Task</h2>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                    <Plus className="h-4 w-4 text-primary" />
+                  </div>
+                  <h2 className="text-sm font-semibold text-foreground">New task</h2>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowTaskForm(!showTaskForm)}
+                <Button
+                  variant={showTaskForm ? "secondary" : "default"}
+                  size="sm"
+                  onClick={() => setShowTaskForm((v) => !v)}
+                  className="h-8 px-3 text-xs font-medium gap-1.5"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {showTaskForm ? "Cancel" : "New Task"}
+                  {showTaskForm ? (
+                    "Cancel"
+                  ) : (
+                    <><Plus className="h-3.5 w-3.5" />Add task</>
+                  )}
                 </Button>
               </div>
-              
+
               {showTaskForm && (
-                <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                <div className="fade-in">
                   {userId && (
-                    <TaskForm 
-                      userId={userId} 
-                      onTaskCreated={handleTaskCreated}
+                    <TaskForm
+                      userId={userId}
+                      onTaskCreated={(t) => { setTasks((p) => [t, ...p]); setShowTaskForm(false); }}
                       onCancel={() => setShowTaskForm(false)}
                     />
                   )}
                 </div>
               )}
-            </section>
+            </div>
 
-            {/* Task List Section */}
-            <section className="bg-card rounded-xl border p-6">
-              <div className="flex items-center justify-between mb-4">
+            {/* Task list card */}
+            <div className="rounded-2xl border border-border bg-card p-5">
+              {/* Header with filter pills */}
+              <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Your Tasks
-                    <span className="ml-2 text-sm font-normal text-muted-foreground">
-                      ({filteredTasks.length} {filter === 'all' ? 'total' : filter})
-                    </span>
-                  </h2>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted">
+                    <ListTodo className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-foreground leading-none">
+                      Your tasks
+                    </h2>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {filtered.length} {filter === "all" ? "total" : filter}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
-                  <select 
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value as 'all' | 'active' | 'completed')}
-                    className="bg-background border rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                  >
-                    <option value="all">All</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                  </select>
+
+                {/* Filter pills */}
+                <div className="flex items-center gap-1 rounded-lg bg-muted p-0.5">
+                  {FILTERS.map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => setFilter(f.value)}
+                      className={cn(
+                        "rounded-md px-3 py-1 text-xs font-medium transition-all duration-150",
+                        filter === f.value
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {f.label}
+                      {f.value === "all" && total > 0 && (
+                        <span className={cn(
+                          "ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
+                          filter === "all"
+                            ? "bg-primary/15 text-primary"
+                            : "bg-muted-foreground/20 text-muted-foreground"
+                        )}>
+                          {total}
+                        </span>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
 
+              {/* Task content */}
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">Loading tasks…</p>
                 </div>
               ) : error ? (
-                <div className="rounded-lg border bg-destructive/10 p-4 text-destructive">
+                <div className="rounded-xl border border-destructive/20 bg-destructive/8 p-4 text-sm text-destructive">
                   {error}
-                </div>
-              ) : filteredTasks.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <CheckCircle2 className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-medium text-foreground">No tasks</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {filter === 'completed' 
-                      ? "You haven't completed any tasks yet." 
-                      : filter === 'active' 
-                        ? "All tasks are completed! Great job!" 
-                        : "Get started by creating a new task."}
-                  </p>
-                  {filter === 'all' && (
-                    <div className="mt-6">
-                      <Button onClick={() => setShowTaskForm(true)}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Task
-                      </Button>
-                    </div>
-                  )}
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 ml-2 text-sm text-destructive underline"
+                    onClick={() => window.location.reload()}
+                  >
+                    Retry
+                  </Button>
                 </div>
               ) : (
                 <TaskList
-                  tasks={filteredTasks}
+                  tasks={filtered}
                   userId={userId || ""}
-                  onTaskUpdated={handleTaskUpdated}
-                  onTaskDeleted={handleTaskDeleted}
+                  onTaskUpdated={(updated) =>
+                    setTasks((p) => p.map((t) => (t.id === updated.id ? updated : t)))
+                  }
+                  onTaskDeleted={(id) =>
+                    setTasks((p) => p.filter((t) => t.id !== id))
+                  }
                 />
               )}
-            </section>
+
+              {/* Empty filter state */}
+              {!loading && !error && filtered.length === 0 && tasks.length > 0 && (
+                <div className="mt-4 text-center">
+                  <button
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+                    onClick={() => setFilter("all")}
+                  >
+                    Show all tasks
+                  </button>
+                </div>
+              )}
+
+              {/* CTA when truly empty */}
+              {!loading && !error && tasks.length === 0 && (
+                <div className="mt-6 flex justify-center">
+                  <Button
+                    onClick={() => setShowTaskForm(true)}
+                    className="gap-2 text-sm"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create your first task
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>
 
-      {/* Floating AI Chat Widget - bottom right */}
       <FloatingChat />
     </div>
   );

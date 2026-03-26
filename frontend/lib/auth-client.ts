@@ -6,7 +6,6 @@
 
 import { createAuthClient } from "better-auth/react";
 import { jwtClient } from "better-auth/client/plugins";
-import type { auth } from "./auth";
 
 const baseURL =
   process.env.NEXT_PUBLIC_BETTER_AUTH_URL ??
@@ -14,7 +13,7 @@ const baseURL =
     ? `${window.location.origin}/api/auth`
     : "http://localhost:3000/api/auth");
 
-export const authClient = createAuthClient<typeof auth>({
+export const authClient = createAuthClient({
   baseURL,
   plugins: [jwtClient()],
 });

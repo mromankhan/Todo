@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import { prefetchToken } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export function SignInForm() {
   const router = useRouter();
@@ -31,27 +32,25 @@ export function SignInForm() {
         ? `${window.location.origin}${callbackPath}`
         : "http://localhost:3000/dashboard";
 
-    const result = await signIn.email({
-      email,
-      password,
-      callbackURL,
-    });
+    const result = await signIn.email({ email, password, callbackURL });
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError("Invalid email or password. Please try again.");
       setLoading(false);
       return;
     }
 
-    // Pre-warm DB + cache JWT before navigation so dashboard loads tasks instantly
     await prefetchToken();
     router.push(callbackPath);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Email */}
+      <div className="space-y-1.5">
+        <Label htmlFor="email" className="text-sm font-medium">
+          Email address
+        </Label>
         <Input
           id="email"
           type="email"
@@ -59,16 +58,21 @@ export function SignInForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          className="h-10 text-sm"
           required
         />
       </div>
 
-      <div className="space-y-2">
+      {/* Password */}
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password" className="text-sm font-medium">
+            Password
+          </Label>
           <Link
             href="/forgot-password"
-            className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            tabIndex={-1}
           >
             Forgot password?
           </Link>
@@ -77,41 +81,58 @@ export function SignInForm() {
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder="Your password"
+            placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
+            className="h-10 pr-10 text-sm"
             required
-            className="pr-10"
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute inset-y-0 right-3 flex items-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
+        <div
+          role="alert"
+          className="rounded-lg border border-destructive/20 bg-destructive/8 px-3.5 py-2.5 text-sm text-destructive"
+        >
           {error}
         </div>
       )}
 
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Signing in..." : "Sign in"}
+      {/* Submit */}
+      <Button
+        type="submit"
+        className={cn("w-full h-10 font-medium transition-all", loading && "opacity-80")}
+        disabled={loading}
+      >
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Signing in…
+          </span>
+        ) : (
+          "Sign in"
+        )}
       </Button>
 
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Don&apos;t have an account?{" "}
+      {/* Link */}
+      <p className="text-center text-sm text-muted-foreground">
+        No account?{" "}
         <Link
           href="/sign-up"
-          className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
+          className="font-medium text-primary hover:text-primary/80 transition-colors"
         >
-          Sign up
+          Create one free
         </Link>
       </p>
     </form>

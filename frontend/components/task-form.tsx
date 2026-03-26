@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import type { Task, TaskCreate } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface TaskFormProps {
   userId: string;
@@ -15,44 +17,33 @@ interface TaskFormProps {
   onCancel?: () => void;
 }
 
-export function TaskForm({
-  userId,
-  onTaskCreated,
-  editTask,
-  onTaskUpdated,
-  onCancel,
-}: TaskFormProps) {
+export function TaskForm({ userId, onTaskCreated, editTask, onTaskUpdated, onCancel }: TaskFormProps) {
   const [title, setTitle] = useState(editTask?.title || "");
   const [description, setDescription] = useState(editTask?.description || "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const isEditing = !!editTask;
+  const titleMax = 200;
+  const descMax = 1000;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!title.trim()) {
-      setError("Title is required");
-      return;
-    }
+    if (!title.trim()) { setError("Task title is required."); return; }
 
     setLoading(true);
-
     try {
       if (isEditing && editTask) {
-        const updatedTask = await api.tasks.update(userId, editTask.id, {
+        const updated = await api.tasks.update(userId, editTask.id, {
           title: title.trim(),
           description: description.trim() || null,
         });
-        onTaskUpdated?.(updatedTask);
+        onTaskUpdated?.(updated);
       } else {
-        const taskData: TaskCreate = {
-          title: title.trim(),
-          description: description.trim() || null,
-        };
-        const newTask = await api.tasks.create(userId, taskData);
+        const data: TaskCreate = { title: title.trim(), description: description.trim() || null };
+        const newTask = await api.tasks.create(userId, data);
         setTitle("");
         setDescription("");
         onTaskCreated?.(newTask);
@@ -66,55 +57,84 @@ export function TaskForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title" className="flex items-center gap-1">
-          <span>Task Title *</span>
-          <span className="text-xs text-muted-foreground">({title.length}/200)</span>
-        </Label>
+      {/* Title */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="task-title" className="text-sm font-medium">
+            Task title <span className="text-destructive">*</span>
+          </Label>
+          <span className={cn(
+            "text-[11px] tabular-nums transition-colors",
+            title.length > titleMax * 0.9 ? "text-amber-500" : "text-muted-foreground/60"
+          )}>
+            {title.length}/{titleMax}
+          </span>
+        </div>
         <Input
-          id="title"
+          id="task-title"
           type="text"
           placeholder="What needs to be done?"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          maxLength={200}
+          maxLength={titleMax}
           required
           autoFocus={!isEditing}
-          className="text-base"
+          className="h-10 text-sm"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="description" className="flex items-center gap-1">
-          <span>Description</span>
-          <span className="text-xs text-muted-foreground">({description.length}/1000)</span>
-        </Label>
+
+      {/* Description */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="task-desc" className="text-sm font-medium text-muted-foreground">
+            Description
+            <span className="ml-1 text-[11px] font-normal">(optional)</span>
+          </Label>
+          {description.length > 0 && (
+            <span className={cn(
+              "text-[11px] tabular-nums transition-colors",
+              description.length > descMax * 0.9 ? "text-amber-500" : "text-muted-foreground/60"
+            )}>
+              {description.length}/{descMax}
+            </span>
+          )}
+        </div>
         <Input
-          id="description"
+          id="task-desc"
           type="text"
-          placeholder="Add more details..."
+          placeholder="Add more details…"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          maxLength={1000}
-          className="text-base"
+          maxLength={descMax}
+          className="h-10 text-sm"
         />
       </div>
+
+      {/* Error */}
       {error && (
-        <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+        <div role="alert" className="rounded-lg border border-destructive/20 bg-destructive/8 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
-      <div className="flex gap-2">
-        <Button type="submit" disabled={loading} className="flex-1">
+
+      {/* Actions */}
+      <div className="flex gap-2 pt-1">
+        <Button
+          type="submit"
+          disabled={loading}
+          className={cn("flex-1 h-10 font-medium gap-2", loading && "opacity-80")}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            !isEditing && <Plus className="h-4 w-4" />
+          )}
           {loading
-            ? isEditing
-              ? "Saving..."
-              : "Adding..."
-            : isEditing
-            ? "Save Changes"
-            : "Add Task"}
+            ? (isEditing ? "Saving…" : "Adding…")
+            : (isEditing ? "Save changes" : "Add task")}
         </Button>
-        {isEditing && onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+        {(isEditing || onCancel) && (
+          <Button type="button" variant="outline" onClick={onCancel} className="h-10 px-4">
             Cancel
           </Button>
         )}
