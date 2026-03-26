@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
+import { prefetchToken } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +43,8 @@ export function SignInForm() {
       return;
     }
 
+    // Pre-warm DB + cache JWT before navigation so dashboard loads tasks instantly
+    await prefetchToken();
     router.push(callbackPath);
   };
 

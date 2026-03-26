@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { signUp } from "@/lib/auth-client";
+import { prefetchToken } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +55,8 @@ export function SignUpForm() {
       return;
     }
 
+    // Pre-warm DB + cache JWT before navigation so dashboard loads tasks instantly
+    await prefetchToken();
     router.push("/dashboard");
   };
 

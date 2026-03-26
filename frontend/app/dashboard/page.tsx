@@ -8,7 +8,7 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { TaskForm } from "@/components/task-form";
 import { TaskList } from "@/components/task-list";
-import { api } from "@/lib/api";
+import { api, clearToken } from "@/lib/api";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import {
   DropdownMenu,
@@ -81,6 +81,7 @@ export default function DashboardPage() {
   };
 
   const handleSignOut = async () => {
+    clearToken();
     await signOut();
     router.push("/");
   };

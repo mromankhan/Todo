@@ -6,29 +6,58 @@ import type { Task, TaskCreate, TaskUpdate } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-/**
- * Get the authentication header for API requests.
- * Uses custom token endpoint that generates HS256-signed JWTs for backend compatibility.
- */
-async function getAuthHeader(): Promise<HeadersInit> {
-  try {
-    // Call our custom token endpoint that generates HS256-signed JWTs
-    const response = await fetch("/api/token", {
-      credentials: "include", // Include cookies for session authentication
-    });
+// In-memory token cache — avoids an extra /api/token round-trip on every request
+// and prevents Neon DB cold-start failures on the first dashboard load after sign-in.
+let _cachedToken: string | null = null;
+let _tokenExpiry = 0;
+let _inflight: Promise<string | null> | null = null;
 
+async function fetchToken(): Promise<string | null> {
+  try {
+    const response = await fetch("/api/token", { credentials: "include" });
     if (response.ok) {
       const data = await response.json();
       if (data.token) {
-        return {
-          Authorization: `Bearer ${data.token}`,
-        };
+        _cachedToken = data.token;
+        _tokenExpiry = Date.now() + 10 * 60 * 1000; // cache for 10 minutes
+        return data.token;
       }
     }
   } catch {
-    // Token endpoint not available, continue without auth
+    // network error — caller will proceed without auth header
   }
-  return {};
+  return null;
+}
+
+async function getAuthHeader(): Promise<HeadersInit> {
+  // Return cached token if still valid
+  if (_cachedToken && Date.now() < _tokenExpiry) {
+    return { Authorization: `Bearer ${_cachedToken}` };
+  }
+
+  // Deduplicate concurrent token requests (e.g. parallel API calls on dashboard mount)
+  if (!_inflight) {
+    _inflight = fetchToken().finally(() => { _inflight = null; });
+  }
+
+  const token = await _inflight;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/**
+ * Call after successful sign-in/sign-up to pre-warm the DB connection and
+ * cache the JWT before the first dashboard API request fires.
+ */
+export async function prefetchToken(): Promise<void> {
+  _cachedToken = null; // clear any stale token
+  _tokenExpiry = 0;
+  await fetchToken();
+}
+
+/** Call on sign-out to clear the cached token immediately. */
+export function clearToken(): void {
+  _cachedToken = null;
+  _tokenExpiry = 0;
 }
 
 /**
