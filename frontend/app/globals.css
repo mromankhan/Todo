@@ -46,84 +46,231 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* ─── Light Mode ─────────────────────────────────────────────────── */
 :root {
-  --radius: 0.625rem;
-  /* Improved light mode colors */
-  --background: oklch(99% 0.005 240); /* Very light blue for better contrast */
-  --foreground: oklch(18% 0.02 240); /* Slightly deeper gray-blue for better readability */
-  --card: oklch(98% 0.008 240); /* Light card background */
-  --card-foreground: oklch(18% 0.02 240);
-  --popover: oklch(100% 0 0); /* Pure white for popovers */
-  --popover-foreground: oklch(18% 0.02 240);
-  --primary: oklch(48% 0.17 230); /* Enhanced blue for better contrast */
-  --primary-foreground: oklch(95% 0.01 240); /* Light gray-white for text on primary */
-  --secondary: oklch(90% 0.015 240); /* Subtle blue-gray */
-  --secondary-foreground: oklch(18% 0.02 240);
-  --muted: oklch(93% 0.008 240); /* Soft muted background */
-  --muted-foreground: oklch(48% 0.01 240); /* Muted text */
-  --accent: oklch(90% 0.015 240); /* Blue-gray accent */
-  --accent-foreground: oklch(18% 0.02 240);
-  --destructive: oklch(75% 0.18 20); /* Vibrant red for destructive actions */
-  --destructive-foreground: oklch(100% 0 0); /* White text on destructive */
-  --border: oklch(88% 0.01 240); /* Subtle border */
-  --input: oklch(88% 0.01 240); /* Input border */
-  --ring: oklch(48% 0.17 230); /* Focus ring color */
-  --chart-1: oklch(35% 0.12 230); /* Chart colors with better contrast */
-  --chart-2: oklch(50% 0.12 260);
-  --chart-3: oklch(65% 0.12 290);
-  --chart-4: oklch(80% 0.12 320);
-  --chart-5: oklch(95% 0.12 350);
-  --sidebar: oklch(100% 0 0); /* Pure white sidebar */
-  --sidebar-foreground: oklch(18% 0.02 240);
-  --sidebar-primary: oklch(48% 0.17 230);
+  --radius: 0.75rem;
+
+  /* Warm-neutral surfaces */
+  --background: oklch(98.5% 0.003 80);
+  --foreground: oklch(16% 0.012 260);
+
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(16% 0.012 260);
+
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(16% 0.012 260);
+
+  /* Violet primary */
+  --primary: oklch(52% 0.22 270);
+  --primary-foreground: oklch(100% 0 0);
+
+  --secondary: oklch(94% 0.008 270);
+  --secondary-foreground: oklch(30% 0.015 270);
+
+  --muted: oklch(95.5% 0.005 80);
+  --muted-foreground: oklch(50% 0.008 260);
+
+  --accent: oklch(93% 0.012 270);
+  --accent-foreground: oklch(30% 0.015 270);
+
+  --destructive: oklch(55% 0.22 25);
+  --destructive-foreground: oklch(100% 0 0);
+
+  --border: oklch(90% 0.006 260);
+  --input: oklch(90% 0.006 260);
+  --ring: oklch(52% 0.22 270);
+
+  /* Charts */
+  --chart-1: oklch(52% 0.22 270);
+  --chart-2: oklch(62% 0.18 200);
+  --chart-3: oklch(72% 0.18 140);
+  --chart-4: oklch(75% 0.18 60);
+  --chart-5: oklch(65% 0.20 25);
+
+  /* Sidebar */
+  --sidebar: oklch(97% 0.004 80);
+  --sidebar-foreground: oklch(16% 0.012 260);
+  --sidebar-primary: oklch(52% 0.22 270);
   --sidebar-primary-foreground: oklch(100% 0 0);
-  --sidebar-accent: oklch(90% 0.015 240);
-  --sidebar-accent-foreground: oklch(18% 0.02 240);
-  --sidebar-border: oklch(88% 0.01 240);
-  --sidebar-ring: oklch(48% 0.17 230);
+  --sidebar-accent: oklch(93% 0.012 270);
+  --sidebar-accent-foreground: oklch(30% 0.015 270);
+  --sidebar-border: oklch(90% 0.006 260);
+  --sidebar-ring: oklch(52% 0.22 270);
+
+  /* Elevation shadows */
+  --shadow-xs: 0 1px 2px oklch(16% 0.012 260 / 0.04);
+  --shadow-sm: 0 1px 3px oklch(16% 0.012 260 / 0.06), 0 1px 2px oklch(16% 0.012 260 / 0.04);
+  --shadow-md: 0 4px 6px oklch(16% 0.012 260 / 0.05), 0 2px 4px oklch(16% 0.012 260 / 0.04);
+  --shadow-lg: 0 10px 15px oklch(16% 0.012 260 / 0.06), 0 4px 6px oklch(16% 0.012 260 / 0.04);
 }
 
+/* ─── Dark Mode ──────────────────────────────────────────────────── */
 .dark {
-  /* Improved dark mode colors */
-  --background: oklch(12% 0.01 240); /* Deep blue-gray for better eye comfort */
-  --foreground: oklch(90% 0.02 240); /* Light blue-gray for better readability */
-  --card: oklch(15% 0.012 240); /* Slightly lighter card background */
-  --card-foreground: oklch(90% 0.02 240);
-  --popover: oklch(12% 0.01 240); /* Matching popover background */
-  --popover-foreground: oklch(90% 0.02 240);
-  --primary: oklch(70% 0.15 230); /* Brighter blue for better contrast */
-  --primary-foreground: oklch(15% 0.01 240); /* Dark text on primary */
-  --secondary: oklch(22% 0.015 240); /* Richer secondary background */
-  --secondary-foreground: oklch(90% 0.02 240);
-  --muted: oklch(20% 0.01 240); /* Better muted background */
-  --muted-foreground: oklch(65% 0.02 240); /* More visible muted text */
-  --accent: oklch(22% 0.015 240); /* Matching accent background */
-  --accent-foreground: oklch(90% 0.02 240);
-  --destructive: oklch(65% 0.18 20); /* Vibrant red that works in dark mode */
-  --destructive-foreground: oklch(100% 0 0); /* White text on destructive */
-  --border: oklch(25% 0.01 240); /* More visible border */
-  --input: oklch(18% 0.01 240); /* Input field background */
-  --ring: oklch(70% 0.15 230); /* Focus ring color */
-  --chart-1: oklch(60% 0.12 230); /* Chart colors optimized for dark mode */
-  --chart-2: oklch(65% 0.12 260);
-  --chart-3: oklch(70% 0.12 290);
-  --chart-4: oklch(75% 0.12 320);
-  --chart-5: oklch(80% 0.12 350);
-  --sidebar: oklch(12% 0.01 240); /* Matching sidebar */
-  --sidebar-foreground: oklch(90% 0.02 240);
-  --sidebar-primary: oklch(70% 0.15 230);
-  --sidebar-primary-foreground: oklch(15% 0.01 240);
-  --sidebar-accent: oklch(22% 0.015 240);
-  --sidebar-accent-foreground: oklch(90% 0.02 240);
-  --sidebar-border: oklch(25% 0.01 240);
-  --sidebar-ring: oklch(70% 0.15 230);
+  --background: oklch(11% 0.008 260);
+  --foreground: oklch(93% 0.008 260);
+
+  --card: oklch(14% 0.01 260);
+  --card-foreground: oklch(93% 0.008 260);
+
+  --popover: oklch(14% 0.01 260);
+  --popover-foreground: oklch(93% 0.008 260);
+
+  --primary: oklch(68% 0.20 270);
+  --primary-foreground: oklch(11% 0.008 260);
+
+  --secondary: oklch(20% 0.012 270);
+  --secondary-foreground: oklch(85% 0.01 270);
+
+  --muted: oklch(18% 0.008 260);
+  --muted-foreground: oklch(60% 0.01 260);
+
+  --accent: oklch(20% 0.012 270);
+  --accent-foreground: oklch(85% 0.01 270);
+
+  --destructive: oklch(60% 0.22 25);
+  --destructive-foreground: oklch(100% 0 0);
+
+  --border: oklch(22% 0.01 260);
+  --input: oklch(20% 0.01 260);
+  --ring: oklch(68% 0.20 270);
+
+  --chart-1: oklch(68% 0.20 270);
+  --chart-2: oklch(65% 0.18 200);
+  --chart-3: oklch(70% 0.18 140);
+  --chart-4: oklch(72% 0.18 60);
+  --chart-5: oklch(65% 0.20 25);
+
+  --sidebar: oklch(13% 0.009 260);
+  --sidebar-foreground: oklch(93% 0.008 260);
+  --sidebar-primary: oklch(68% 0.20 270);
+  --sidebar-primary-foreground: oklch(11% 0.008 260);
+  --sidebar-accent: oklch(20% 0.012 270);
+  --sidebar-accent-foreground: oklch(85% 0.01 270);
+  --sidebar-border: oklch(22% 0.01 260);
+  --sidebar-ring: oklch(68% 0.20 270);
+
+  --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.20);
+  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.25), 0 1px 2px oklch(0% 0 0 / 0.18);
+  --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.22), 0 2px 4px oklch(0% 0 0 / 0.18);
+  --shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.28), 0 4px 6px oklch(0% 0 0 / 0.20);
 }
 
+/* ─── Base ───────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    line-height: 1.6;
+  }
+
+  /* Smooth focus rings */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  /* Selection colour matches primary */
+  ::selection {
+    background: oklch(52% 0.22 270 / 0.18);
+  }
+  .dark ::selection {
+    background: oklch(68% 0.20 270 / 0.28);
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────────────────────── */
+@layer utilities {
+  /* Glassmorphism backdrop for header */
+  .glass-header {
+    background: oklch(100% 0 0 / 0.80);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+  .dark .glass-header {
+    background: oklch(11% 0.008 260 / 0.85);
+  }
+
+  /* Gradient text — primary brand */
+  .gradient-text {
+    background: linear-gradient(135deg, oklch(52% 0.22 270), oklch(62% 0.20 300));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .gradient-text {
+    background: linear-gradient(135deg, oklch(68% 0.20 270), oklch(75% 0.18 300));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Subtle card hover lift */
+  .card-lift {
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .card-lift:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  /* Checkbox animation */
+  .check-bounce {
+    transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .check-bounce:active {
+    transform: scale(0.88);
+  }
+
+  /* Staggered list entrance */
+  .task-enter {
+    animation: taskSlideIn 200ms ease-out both;
+  }
+
+  @keyframes taskSlideIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Fade in */
+  .fade-in {
+    animation: fadeIn 250ms ease-out both;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Shimmer skeleton */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--muted) 25%,
+      oklch(from var(--muted) l c h / 0.5) 50%,
+      var(--muted) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .task-enter, .fade-in, .shimmer, .card-lift,
+    .check-bounce, * { animation: none !important; transition-duration: 0ms !important; }
   }
 }

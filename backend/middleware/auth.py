@@ -9,40 +9,23 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 security = HTTPBearer()
 
+_ALGORITHMS = ["HS256"]
 
-async def verify_jwt(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> dict[str, Any]:
-    """
-    Verify JWT token and return the decoded payload.
 
-    Args:
-        credentials: The HTTP authorization credentials containing the Bearer token.
-
-    Returns:
-        The decoded JWT payload containing user information.
-
-    Raises:
-        HTTPException: If the token is invalid, expired, or missing.
-    """
-    token = credentials.credentials
-
+def _get_secret() -> str:
     secret = os.environ.get("BETTER_AUTH_SECRET")
     if not secret:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server configuration error: missing auth secret",
         )
+    return secret
 
+
+def _decode(token: str) -> dict[str, Any]:
     try:
-        # Verify the JWT token using HS256 algorithm
-        payload = jwt.decode(
-            token,
-            secret,
-            algorithms=["HS256"],
-        )
-        return payload
-    except JWTError as e:
+        return jwt.decode(token, _get_secret(), algorithms=_ALGORITHMS)
+    except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
@@ -50,105 +33,42 @@ async def verify_jwt(
         )
 
 
-async def verify_jwt_from_cookie(request: Request) -> dict[str, Any]:
-    """
-    Verify JWT token from cookie (for ChatKit endpoint).
-
-    Better Auth stores the session token in a cookie named 'better-auth.session_token'.
-    This function extracts and validates that token for ChatKit requests.
-
-    Args:
-        request: The FastAPI request object.
-
-    Returns:
-        The decoded JWT payload containing user information.
-
-    Raises:
-        HTTPException: If the token is invalid, expired, or missing.
-    """
-    # Try multiple cookie names where Better Auth might store the token
-    token = (
-        request.cookies.get("better-auth.session_token") or
-        request.cookies.get("session_token") or
-        request.cookies.get("auth_token")
-    )
-
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required: no session token found",
-        )
-
-    secret = os.environ.get("BETTER_AUTH_SECRET")
-    if not secret:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Server configuration error: missing auth secret",
-        )
-
-    try:
-        # Verify the JWT token using HS256 algorithm
-        payload = jwt.decode(
-            token,
-            secret,
-            algorithms=["HS256"],
-        )
-        return payload
-    except JWTError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired session token",
-        )
+async def verify_jwt(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> dict[str, Any]:
+    """Verify Bearer JWT and return decoded payload."""
+    return _decode(credentials.credentials)
 
 
 async def verify_jwt_bearer(request: Request) -> dict[str, Any]:
-    """
-    Verify JWT from Authorization Bearer header (for ChatKit endpoint).
-
-    Manually extracts the Bearer token from the Authorization header
-    without using HTTPBearer dependency (avoids OpenAPI security scheme issues).
-    """
+    """Verify Bearer JWT from Authorization header (no OpenAPI security scheme)."""
     auth_header = request.headers.get("authorization", "")
     if not auth_header.lower().startswith("bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authorization header with Bearer token required",
         )
+    return _decode(auth_header[7:])
 
-    token = auth_header[7:]  # Strip "Bearer " prefix
 
-    secret = os.environ.get("BETTER_AUTH_SECRET")
-    if not secret:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Server configuration error: missing auth secret",
-        )
-
-    try:
-        payload = jwt.decode(token, secret, algorithms=["HS256"])
-        return payload
-    except JWTError:
+async def verify_jwt_from_cookie(request: Request) -> dict[str, Any]:
+    """Verify JWT stored in Better Auth session cookie."""
+    token = (
+        request.cookies.get("todo-auth.session_token")
+        or request.cookies.get("better-auth.session_token")
+        or request.cookies.get("session_token")
+    )
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Authentication required: no session token found",
         )
+    return _decode(token)
 
 
 def validate_user_access(user_id: str, current_user: dict[str, Any]) -> None:
-    """
-    Validate that the current user has access to the specified user_id's resources.
-
-    Args:
-        user_id: The user_id from the URL path.
-        current_user: The decoded JWT payload containing the authenticated user's info.
-
-    Raises:
-        HTTPException: If the user_id doesn't match the authenticated user.
-    """
-    # The custom token endpoint puts user ID in the "sub" claim
-    token_user_id = current_user.get("sub")
-
-    if user_id != token_user_id:
+    """Raise 403 if the authenticated user does not own the requested resource."""
+    if user_id != current_user.get("sub"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied: cannot access other user's resources",

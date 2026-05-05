@@ -1,34 +1,38 @@
-import { NextResponse, NextRequest } from 'next/server'
+/**
+ * Next.js 16 Proxy (formerly Middleware) — protects authenticated routes.
+ * Redirects unauthenticated requests to /sign-in.
+ */
+import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
+const PROTECTED_PREFIXES = ["/dashboard"];
+const AUTH_PATHS = ["/sign-in", "/sign-up"];
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname } = request.nextUrl;
 
-  // Proxy API requests to FastAPI backend
-  if (pathname.startsWith('/api/backend')) {
-    const backendPath = pathname.replace('/api/backend', '')
-    const backendUrl = new URL(backendPath, BACKEND_URL)
+  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
+  const isAuthPath = AUTH_PATHS.some((p) => pathname.startsWith(p));
 
-    // Copy search params
-    request.nextUrl.searchParams.forEach((value, key) => {
-      backendUrl.searchParams.set(key, value)
-    })
+  const sessionCookie = getSessionCookie(request, {
+    cookiePrefix: "todo-auth",
+  });
 
-    // Create new headers and forward Authorization
-    const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-forwarded-host', request.nextUrl.host)
-
-    return NextResponse.rewrite(backendUrl, {
-      request: {
-        headers: requestHeaders,
-      },
-    })
+  if (isProtected && !sessionCookie) {
+    const signIn = new URL("/sign-in", request.url);
+    signIn.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(signIn);
   }
 
-  return NextResponse.next()
+  if (isAuthPath && sessionCookie) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: '/api/backend/:path*',
-}
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
+};
